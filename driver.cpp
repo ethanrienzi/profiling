@@ -4,7 +4,7 @@
 
 int main(int argc, char* argv[])
 {
-    printf("painer.\n");
+    printf("painest.\n");
 
     return 0;
 }
