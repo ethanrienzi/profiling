@@ -4,7 +4,7 @@
 
 int main(int argc, char* argv[])
 {
-    printf("HelloWorld\n");
+    printf("pain.\n");
 
     return 0;
 }
