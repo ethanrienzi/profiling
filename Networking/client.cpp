@@ -22,8 +22,30 @@ void loadClientConfig(ClientConfig& config) {
     }
 }
 
-void communicateWithServer() {
+void communicateWithServer(int clientSocket) {
     // Client communication with server
+
+	const char* message = "Hello, Server!";
+    send(clientSocket, message, strlen(message), 0);
+
+    const int bufferSize = 1024;
+    char buffer[bufferSize];
+    ssize_t bytesRead = recv(clientSocket, buffer, bufferSize - 1, 0);
+
+    if (bytesRead <= 0) {
+        if (bytesRead == 0) {
+            std::cout << "Server disconnected." << std::endl;
+        } else {
+            perror("Error receiving data from server");
+        }
+    } else {
+        buffer[bytesRead] = '\0';
+        std::cout << "Received from server: " << buffer << std::endl;
+    }
+
+    // Close the client socket
+    close(clientSocket);
+
 }
 
 int main() {
@@ -40,7 +62,7 @@ int main() {
   serverAddr.sin_family = AF_INET;
   serverAddr.sin_port = htons(clientConfig.PORT);
   inet_pton(AF_INET, clientConfig.serverAddress.c_str(), &serverAddr.sin_addr);
-
+ 
   if (connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
       std::cerr << "Error: Unable to connect to the server." << std::endl;
       close(clientSocket);
@@ -53,7 +75,10 @@ int main() {
     // ...
     close(clientSocket);
 
-    std::thread(communicateWithServer).detach();
+    std::thread([&clientSocket](){
+		    communicateWithServer(clientSocket);
+		    }).detach();
+    //std::thread(communicateWithServer).detach();
 
     return 0;
 }
