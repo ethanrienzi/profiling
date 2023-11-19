@@ -83,7 +83,7 @@ int main() {
    send(clientSocket, message, strlen(message), 0);
     // Client setup code using clientConfig.serverAddress and clientConfig.port
     // ...
-    close(clientSocket);
+    
 
     communicateWithServer(clientSocket, clientConfig.NUM_MESSAGES);
    // std::thread([&clientSocket](){
@@ -91,6 +91,7 @@ int main() {
 //		    }).detach();
     //std::thread(communicateWithServer).detach();
 
+    close(clientSocket);
     return 0;
 }
 
