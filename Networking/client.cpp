@@ -24,10 +24,15 @@ void loadClientConfig(ClientConfig& config) {
 
 void communicateWithServer(int clientSocket) {
     // Client communication with server
+    const char* message = "Hello, Server!";
 
-	const char* message = "Hello, Server!";
+    // Send a message to the server
     send(clientSocket, message, strlen(message), 0);
 
+    // Print the sent message
+    std::cout << "Sent to server: " << message << std::endl;
+
+    // Receive a response from the server
     const int bufferSize = 1024;
     char buffer[bufferSize];
     ssize_t bytesRead = recv(clientSocket, buffer, bufferSize - 1, 0);
@@ -40,12 +45,13 @@ void communicateWithServer(int clientSocket) {
         }
     } else {
         buffer[bytesRead] = '\0';
+
+        // Print the received response
         std::cout << "Received from server: " << buffer << std::endl;
     }
 
     // Close the client socket
     close(clientSocket);
-
 }
 
 int main() {

@@ -28,23 +28,20 @@ void handleClient(int clientSocket) {
     char buffer[bufferSize];
 
     while (true) {
-        // Receive data from the client
         ssize_t bytesRead = recv(clientSocket, buffer, bufferSize - 1, 0);
 
         if (bytesRead <= 0) {
-            // Error or connection closed by client
             if (bytesRead == 0) {
-                // Connection closed
                 std::cout << "Client disconnected." << std::endl;
             } else {
                 perror("Error receiving data");
             }
-            break; // Exit the loop if an error or connection closure occurs
+            break;
         }
 
-        buffer[bytesRead] = '\0'; // Null-terminate the received data
+        buffer[bytesRead] = '\0';
 
-        // Process the received data (e.g., print it)
+        // Print the received message
         std::cout << "Received from client: " << buffer << std::endl;
 
         // Send a response back to the client
@@ -53,8 +50,11 @@ void handleClient(int clientSocket) {
 
         if (bytesSent == -1) {
             perror("Error sending data");
-            break; // Exit the loop if an error occurs during sending
+            break;
         }
+        
+        // Print the sent response
+        std::cout << "Sent to client: " << response << std::endl;
     }
 
     // Close the client socket
