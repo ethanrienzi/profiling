@@ -103,6 +103,7 @@ int main() {
       }
         // Handle the connection (you need to implement this part)
         // e.g., launch a new thread or perform some operation on the clientSocket
+      std::thread(handleClient, clientSocket).detach();
     }
     close(serverSocket);
   
