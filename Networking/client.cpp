@@ -10,40 +10,44 @@
 struct ClientConfig {
     std::string serverAddress;
     int PORT;
+    int NUM_MESSAGES;
 };
 
 void loadClientConfig(ClientConfig& config) {
     std::ifstream configFile("client_config.txt");
     if (configFile.is_open()) {
-        configFile >> config.serverAddress >> config.PORT;
+        configFile >> config.serverAddress >> config.PORT >> config.NUM_MESSAGES;
         configFile.close();
     } else {
         std::cerr << "Error: Unable to open client config file." << std::endl;
     }
 }
 
-void communicateWithServer(int clientSocket) {
+void communicateWithServer(int clientSocket, int numMessages) {
     // Client communication with server
     const char* message = "Hello, Server!";
 
-    // Send a message to the server
-    send(clientSocket, message, strlen(message), 0);
+    for (int i = 0; i < numMessages; ++i) {
+        // Send a message to the server
+        send(clientSocket, message, strlen(message), 0);
 
-    // Print the sent message
-    std::cout << "Sent to server: " << message << std::endl;
+        // Print the sent message
+        std::cout << "Sent to server: " << message << std::endl;
 
-    // Receive a response from the server
-    const int bufferSize = 1024;
-    char buffer[bufferSize];
-    ssize_t bytesRead = recv(clientSocket, buffer, bufferSize - 1, 0);
+        // Receive a response from the server
+        const int bufferSize = 1024;
+        char buffer[bufferSize];
+        ssize_t bytesRead = recv(clientSocket, buffer, bufferSize - 1, 0);
 
-    if (bytesRead <= 0) {
-        if (bytesRead == 0) {
-            std::cout << "Server disconnected." << std::endl;
-        } else {
-            perror("Error receiving data from server");
+        if (bytesRead <= 0) {
+            if (bytesRead == 0) {
+                std::cout << "Server disconnected." << std::endl;
+            } else {
+                perror("Error receiving data from server");
+            }
+            break;
         }
-    } else {
+
         buffer[bytesRead] = '\0';
 
         // Print the received response
@@ -81,9 +85,10 @@ int main() {
     // ...
     close(clientSocket);
 
-    std::thread([&clientSocket](){
-		    communicateWithServer(clientSocket);
-		    }).detach();
+    communicateWithServer(clientSocket, clientConfig.NUM_MESSAGES);
+   // std::thread([&clientSocket](){
+//		    communicateWithServer(clientSocket, clientConfig.NUM_MESSAGES);
+//		    }).detach();
     //std::thread(communicateWithServer).detach();
 
     return 0;
