@@ -10,24 +10,25 @@
 
 struct ServerConfig {
     int PORT;
+    int NUM_MESSAGES;
 };
 
 void loadServerConfig(ServerConfig& config) {
   std::ifstream configFile("server_config.txt");
   if (configFile.is_open()) {
-      configFile >> config.PORT;
+      configFile >> config.PORT >> config.NUM_MESSAGES;
       configFile.close();
   } else {
       std::cerr << "Error: Unable to open server config file." << std::endl;
         }
   }
-void handleClient(int clientSocket) {
+void handleClient(int clientSocket, int numMessages) {
     // Handle client communication
 
 	const int bufferSize = 1024;
     char buffer[bufferSize];
 
-    while (true) {
+    for (int i = 0; i < numMessages, i++) {
         ssize_t bytesRead = recv(clientSocket, buffer, bufferSize - 1, 0);
 
         if (bytesRead <= 0) {
@@ -103,7 +104,7 @@ int main() {
       }
         // Handle the connection (you need to implement this part)
         // e.g., launch a new thread or perform some operation on the clientSocket
-      std::thread(handleClient, clientSocket).detach();
+      std::thread(handleClient, clientSocket, serverConfig.NUM_MESSAGES).detach();
     }
     close(serverSocket);
   
