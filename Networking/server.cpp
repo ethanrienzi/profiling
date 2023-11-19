@@ -28,7 +28,7 @@ void handleClient(int clientSocket, int numMessages) {
 	const int bufferSize = 1024;
     char buffer[bufferSize];
 
-    for (int i = 0; i < numMessages, i++) {
+    for (int i = 0; i < numMessages; i++) {
         ssize_t bytesRead = recv(clientSocket, buffer, bufferSize - 1, 0);
 
         if (bytesRead <= 0) {
