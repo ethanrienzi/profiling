@@ -70,9 +70,9 @@ int main() {
     std::cout << "Connection established with client" << std::endl;
 
     char buffer[256];
-    ssize_t bytesRead;
+    ssize_t bytesRead, bytesSent;
 
-    while (true) {
+    for (int i = 0; i < communicationTime; ++i) {
         // Read data from client
         bytesRead = read(clientSocket, buffer, sizeof(buffer));
         if (bytesRead <= 0) {
@@ -84,10 +84,12 @@ int main() {
 
         // Send a response back to client
         const char* responseMessage = "Hello from the server";
-        ssize_t bytesSent = write(clientSocket, responseMessage, strlen(responseMessage) + 1);  // +1 to include null terminator
+        bytesSent = write(clientSocket, responseMessage, strlen(responseMessage) + 1);  // +1 to include null terminator
         if (bytesSent < 0) {
             error("Error writing to socket");
         }
+
+        sleep(1);  // Sleep for 1 second between exchanges
     }
 
     close(clientSocket);
