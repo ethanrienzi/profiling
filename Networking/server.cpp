@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <cstring>
 #include <cstdlib>
 #include <unistd.h>
@@ -73,11 +72,12 @@ int main() {
     char buffer[256];
     ssize_t bytesRead;
 
-    for (int i = 0; i < communicationTime; ++i) {
+    while (true) {
         // Read data from client
         bytesRead = read(clientSocket, buffer, sizeof(buffer));
-        if (bytesRead < 0) {
-            error("Error reading from socket");
+        if (bytesRead <= 0) {
+            // Connection closed by client
+            break;
         }
 
         std::cout << "Received message from client: " << buffer << std::endl;
@@ -88,8 +88,6 @@ int main() {
         if (bytesSent < 0) {
             error("Error writing to socket");
         }
-
-        sleep(1);  // Sleep for 1 second between exchanges
     }
 
     close(clientSocket);
