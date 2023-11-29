@@ -72,7 +72,7 @@ int main() {
     char buffer[256];
     ssize_t bytesRead, bytesSent;
 
-    for (int i = 0; i < communicationTime; ++i) {
+    while (communicationTime > 0) {
         // Read data from client
         bytesRead = read(clientSocket, buffer, sizeof(buffer));
         if (bytesRead <= 0) {
@@ -90,6 +90,7 @@ int main() {
         }
 
         sleep(1);  // Sleep for 1 second between exchanges
+        communicationTime--;
     }
 
     close(clientSocket);
