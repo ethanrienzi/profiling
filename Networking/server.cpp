@@ -1,114 +1,101 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <cstring>
 #include <cstdlib>
 #include <unistd.h>
 #include <arpa/inet.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <thread>
 
-struct ServerConfig {
-    int PORT;
-    int NUM_MESSAGES;
-};
-
-void loadServerConfig(ServerConfig& config) {
-  std::ifstream configFile("server_config.txt");
-  if (configFile.is_open()) {
-      configFile >> config.PORT >> config.NUM_MESSAGES;
-      configFile.close();
-  } else {
-      std::cerr << "Error: Unable to open server config file." << std::endl;
-        }
-  }
-void handleClient(int clientSocket, int numMessages) {
-    // Handle client communication
-
-	const int bufferSize = 1024;
-    char buffer[bufferSize];
-
-    for (int i = 0; i < numMessages; i++) {
-        ssize_t bytesRead = recv(clientSocket, buffer, bufferSize - 1, 0);
-
-        if (bytesRead <= 0) {
-            if (bytesRead == 0) {
-                std::cout << "Client disconnected." << std::endl;
-            } else {
-                perror("Error receiving data");
-            }
-            break;
-        }
-
-        buffer[bytesRead] = '\0';
-
-        // Print the received message
-        std::cout << "Received from client: " << buffer << std::endl;
-
-        // Send a response back to the client
-        const char* response = "Hello, Client!";
-        ssize_t bytesSent = send(clientSocket, response, strlen(response), 0);
-
-        if (bytesSent == -1) {
-            perror("Error sending data");
-            break;
-        }
-        
-        // Print the sent response
-        std::cout << "Sent to client: " << response << std::endl;
-    }
-
-    // Close the client socket
-    close(clientSocket);
+void error(const char *msg) {
+    perror(msg);
+    exit(1);
 }
 
 int main() {
-    ServerConfig serverConfig;
-    loadServerConfig(serverConfig);
-
-    int serverSocket, clientSocket;
-    struct sockaddr_in serverAddr, clientAddr;
-    socklen_t clientAddrLen = sizeof(clientAddr);
-    // Server setup code using serverConfig.PORT
-    serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-  
-    if (serverSocket == -1) {
-      perror("Error creating socket");
-      exit(EXIT_FAILURE);
+    std::ifstream configFile("config.txt");
+    if (!configFile) {
+        std::cerr << "Error opening config file.\n";
+        return 1;
     }
 
-    memset(&serverAddr, 0, sizeof(serverAddr));
+    std::string serverIP;
+    int serverPort, communicationTime;
+
+    // Read Server IP
+    if (!(configFile >> serverIP)) {
+        std::cerr << "Error reading Server IP.\n";
+        return 1;
+    }
+
+    // Read Server Port
+    if (!(configFile >> serverPort)) {
+        std::cerr << "Error reading Server Port.\n";
+        return 1;
+    }
+
+    // Read Communication Time
+    if (!(configFile >> communicationTime)) {
+        std::cerr << "Error reading Communication Time.\n";
+        return 1;
+    }
+
+    configFile.close();
+
+    std::cout << "Read configuration - ServerIP: " << serverIP << ", Port: " << serverPort << ", CommunicationTime: " << communicationTime << " seconds\n";
+
+    int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (serverSocket < 0) {
+        error("Error opening socket");
+    }
+
+    sockaddr_in serverAddr;
+    std::memset(&serverAddr, 0, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_addr.s_addr = INADDR_ANY;
-    serverAddr.sin_port = htons(serverConfig.PORT);
+    serverAddr.sin_addr.s_addr = inet_addr(serverIP.c_str());
+    serverAddr.sin_port = htons(serverPort);
 
-    // Bind the server socket and listen for incoming connections
-    // ...
-    // Accept client connection
-    if (bind(serverSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == -1) {
-      perror("Error binding socket");
-      close(serverSocket);
-      exit(EXIT_FAILURE);
+    if (bind(serverSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) < 0) {
+        error("Error on binding");
     }
 
-     if (listen(serverSocket, 10) == -1) {
-      perror("Error listening for connections");
-      close(serverSocket);
-      exit(EXIT_FAILURE);
-  }
-      while (true) {
-       clientSocket = accept(serverSocket, (struct sockaddr *)&clientAddr, &clientAddrLen);
-      if (clientSocket == -1) {
-       perror("Error accepting connection");
-      continue;
-      }
-        // Handle the connection (you need to implement this part)
-        // e.g., launch a new thread or perform some operation on the clientSocket
-      std::thread(handleClient, clientSocket, serverConfig.NUM_MESSAGES).detach();
+    listen(serverSocket, 1);
+    std::cout << "Server listening on " << serverIP << ":" << serverPort << std::endl;
+
+    sockaddr_in clientAddr;
+    socklen_t clientLen = sizeof(clientAddr);
+    int clientSocket = accept(serverSocket, (struct sockaddr *) &clientAddr, &clientLen);
+    if (clientSocket < 0) {
+        error("Error on accept");
     }
+
+    std::cout << "Connection established with client" << std::endl;
+
+    char buffer[256];
+    ssize_t bytesRead;
+
+    for (int i = 0; i < communicationTime; ++i) {
+        // Read data from client
+        bytesRead = read(clientSocket, buffer, sizeof(buffer));
+        if (bytesRead < 0) {
+            error("Error reading from socket");
+        }
+
+        std::cout << "Received message from client: " << buffer << std::endl;
+
+        // Send a response back to client
+        const char* responseMessage = "Hello from the server";
+        ssize_t bytesSent = write(clientSocket, responseMessage, strlen(responseMessage));
+        if (bytesSent < 0) {
+            error("Error writing to socket");
+        }
+
+        sleep(1);  // Sleep for 1 second between exchanges
+    }
+
+    close(clientSocket);
     close(serverSocket);
-  
+
+    std::cout << "Communication complete. Server shutting down." << std::endl;
+
     return 0;
 }
-
-
