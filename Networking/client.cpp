@@ -7,35 +7,22 @@
 
 void error(const char *msg) {
     perror(msg);
-    exit(1);
+    exit(EXIT_FAILURE);
 }
 
 int main() {
     std::ifstream configFile("config.txt");
     if (!configFile) {
         std::cerr << "Error opening config file.\n";
-        return 1;
+        return EXIT_FAILURE;
     }
 
     std::string serverIP;
     int serverPort, communicationTime;
 
-    // Read Server IP
-    if (!(configFile >> serverIP)) {
-        std::cerr << "Error reading Server IP.\n";
-        return 1;
-    }
-
-    // Read Server Port
-    if (!(configFile >> serverPort)) {
-        std::cerr << "Error reading Server Port.\n";
-        return 1;
-    }
-
-    // Read Communication Time
-    if (!(configFile >> communicationTime)) {
-        std::cerr << "Error reading Communication Time.\n";
-        return 1;
+    if (!(configFile >> serverIP >> serverPort >> communicationTime)) {
+        std::cerr << "Error reading config file.\n";
+        return EXIT_FAILURE;
     }
 
     configFile.close();
@@ -74,6 +61,7 @@ int main() {
         bytesRead = read(clientSocket, responseBuffer, sizeof(responseBuffer));
         if (bytesRead <= 0) {
             // Connection closed by server
+            std::cerr << "Error reading from server\n";
             break;
         }
 
