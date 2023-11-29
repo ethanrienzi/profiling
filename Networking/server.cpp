@@ -84,7 +84,7 @@ int main() {
 
         // Send a response back to client
         const char* responseMessage = "Hello from the server";
-        ssize_t bytesSent = write(clientSocket, responseMessage, strlen(responseMessage));
+        ssize_t bytesSent = write(clientSocket, responseMessage, strlen(responseMessage) + 1);  // +1 to include null terminator
         if (bytesSent < 0) {
             error("Error writing to socket");
         }
