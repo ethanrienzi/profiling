@@ -57,6 +57,8 @@ int main() {
             error("Error writing to socket");
         }
 
+        std::cout << "Sent message to server" << std::endl;
+
         // Read response from server
         bytesRead = read(clientSocket, responseBuffer, sizeof(responseBuffer));
         if (bytesRead <= 0) {
