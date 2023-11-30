@@ -7,35 +7,22 @@
 
 void error(const char *msg) {
     perror(msg);
-    exit(1);
+    exit(EXIT_FAILURE);
 }
 
 int main() {
     std::ifstream configFile("config.txt");
     if (!configFile) {
         std::cerr << "Error opening config file.\n";
-        return 1;
+        return EXIT_FAILURE;
     }
 
     std::string serverIP;
     int serverPort, communicationTime;
 
-    // Read Server IP
-    if (!(configFile >> serverIP)) {
-        std::cerr << "Error reading Server IP.\n";
-        return 1;
-    }
-
-    // Read Server Port
-    if (!(configFile >> serverPort)) {
-        std::cerr << "Error reading Server Port.\n";
-        return 1;
-    }
-
-    // Read Communication Time
-    if (!(configFile >> communicationTime)) {
-        std::cerr << "Error reading Communication Time.\n";
-        return 1;
+    if (!(configFile >> serverIP >> serverPort >> communicationTime)) {
+        std::cerr << "Error reading config file.\n";
+        return EXIT_FAILURE;
     }
 
     configFile.close();
@@ -57,7 +44,10 @@ int main() {
         error("Error on binding");
     }
 
-    listen(serverSocket, 1);
+    if (listen(serverSocket, 1) < 0) {
+        error("Error on listen");
+    }
+
     std::cout << "Server listening on " << serverIP << ":" << serverPort << std::endl;
 
     sockaddr_in clientAddr;
@@ -67,16 +57,17 @@ int main() {
         error("Error on accept");
     }
 
-    std::cout << "Connection established with client" << std::endl;
-
     char buffer[256];
     ssize_t bytesRead, bytesSent;
+
+    std::cout << "Connection established with client" << std::endl;
 
     while (communicationTime > 0) {
         // Read data from client
         bytesRead = read(clientSocket, buffer, sizeof(buffer));
         if (bytesRead <= 0) {
             // Connection closed by client
+            std::cerr << "Error reading from client\n";
             break;
         }
 
@@ -88,6 +79,8 @@ int main() {
         if (bytesSent < 0) {
             error("Error writing to socket");
         }
+
+        std::cout << "Sent response to client" << std::endl;
 
         sleep(1);  // Sleep for 1 second between exchanges
         communicationTime--;
