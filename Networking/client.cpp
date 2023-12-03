@@ -50,6 +50,8 @@ int main() {
     char responseBuffer[256];
     ssize_t bytesRead, bytesSent;
 
+    int messageCount = 0; // Counter for messages exchanged
+
     while (communicationTime > 0) {
         // Send data to server
         bytesSent = write(clientSocket, message, strlen(message) + 1);  // +1 to include null terminator
@@ -58,6 +60,7 @@ int main() {
         }
 
         std::cout << "Sent message to server" << std::endl;
+        messageCount++;
 
         // Read response from server
         bytesRead = read(clientSocket, responseBuffer, sizeof(responseBuffer));
@@ -75,7 +78,8 @@ int main() {
 
     close(clientSocket);
 
-    std::cout << "Communication complete. Client shutting down." << std::endl;
+    std::cout << "Communication complete. Client shutting down.\n";
+    std::cout << "Number of messages exchanged: " << messageCount << std::endl;
 
     return 0;
 }
