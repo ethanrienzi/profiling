@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <ctime>
 
 void error(const char *msg) {
     perror(msg);
@@ -64,7 +65,9 @@ int main() {
 
     int messageCount = 0; // Counter for messages exchanged
 
-    while (communicationTime > 0) {
+    time_t startTime = time(nullptr);
+
+    while (true) {
         // Read data from client
         bytesRead = read(clientSocket, buffer, sizeof(buffer));
         if (bytesRead <= 0) {
@@ -85,7 +88,11 @@ int main() {
 
         std::cout << "Sent response to client" << std::endl;
 
-        communicationTime--;
+        // Check elapsed time
+        time_t currentTime = time(nullptr);
+        if (currentTime - startTime >= communicationTime) {
+            break;  // Break the loop if the specified time has elapsed
+        }
     }
 
     close(clientSocket);
