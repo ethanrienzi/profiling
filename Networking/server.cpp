@@ -85,7 +85,7 @@ int main() {
 
         std::cout << "Sent response to client" << std::endl;
 
-        sleep(1);  // Sleep for 1 second between exchanges
+        //sleep(1);  // Sleep for 1 second between exchanges
         communicationTime--;
     }
 
