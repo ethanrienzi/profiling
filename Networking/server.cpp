@@ -64,29 +64,29 @@ int main() {
 
     int messageCount = 0; // Counter for messages exchanged
 
-    while (communicationTime > 0) {
-        // Read data from client
-        bytesRead = read(clientSocket, buffer, sizeof(buffer));
-        if (bytesRead <= 0) {
-            // Connection closed by client
-            std::cerr << "Error reading from client\n";
-            break;
-        }
+while (communicationTime > 0) {
+    // Read data from client
+    bytesRead = read(clientSocket, buffer, sizeof(buffer));
+    if (bytesRead <= 0) {
+        // Connection closed by client
+        std::cerr << "Error reading from client\n";
+        break;
+    }
 
-        std::cout << "Received message from client: " << buffer << std::endl;
-        messageCount++;
+    std::cout << "Received message from client: " << buffer << std::endl;
+    messageCount++;
 
-        // Send a response back to client
-        const char* responseMessage = "Hello from the server";
-        bytesSent = write(clientSocket, responseMessage, strlen(responseMessage) + 1);  // +1 to include null terminator
-        if (bytesSent < 0) {
-            error("Error writing to socket");
-        }
+    // Send a response back to client
+    const char* responseMessage = "Hello from the server";
+    bytesSent = write(clientSocket, responseMessage, strlen(responseMessage) + 1);  // +1 to include null terminator
+    if (bytesSent < 0) {
+        error("Error writing to socket");
+    }
 
-        std::cout << "Sent response to client" << std::endl;
+    std::cout << "Sent response to client" << std::endl;
 
-        sleep(1);  // Sleep for 1 second between exchanges
-        communicationTime--;
+    communicationTime--;
+}
     }
 
     close(clientSocket);
