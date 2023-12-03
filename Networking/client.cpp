@@ -72,7 +72,7 @@ int main() {
 
         std::cout << "Received response from server: " << responseBuffer << std::endl;
 
-        //sleep(1);  // Sleep for 1 second between exchanges
+        sleep(1);  // Sleep for 1 second between exchanges
         communicationTime--;
     }
 
