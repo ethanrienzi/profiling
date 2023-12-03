@@ -62,6 +62,8 @@ int main() {
 
     std::cout << "Connection established with client" << std::endl;
 
+    int messageCount = 0; // Counter for messages exchanged
+
     while (communicationTime > 0) {
         // Read data from client
         bytesRead = read(clientSocket, buffer, sizeof(buffer));
@@ -72,6 +74,7 @@ int main() {
         }
 
         std::cout << "Received message from client: " << buffer << std::endl;
+        messageCount++;
 
         // Send a response back to client
         const char* responseMessage = "Hello from the server";
@@ -89,7 +92,8 @@ int main() {
     close(clientSocket);
     close(serverSocket);
 
-    std::cout << "Communication complete. Server shutting down." << std::endl;
+    std::cout << "Communication complete. Server shutting down.\n";
+    std::cout << "Number of messages exchanged: " << messageCount << std::endl;
 
     return 0;
 }
